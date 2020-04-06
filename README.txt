@@ -1,10 +1,20 @@
 TM1638 library
 --------------
+Roger Kilchenmann
+Email: roger@kilchenmann.net
+URL: https://github.com/rkilchmn/tm1638-library
+
+Based on the great work of:
 Ricardo Batista
 Email: rjbatista(at)gmail.com
 URL: https://github.com/rjbatista/tm1638-library/
 
 A library for interacting an arduino with a TM1638/TM1640.
+
+Whats different from https://github.com/rjbatista/tm1638-library/
+- supports generic common anode designs like TM1638QYF but supports up to 8 digits and allows to change digit positions 
+- supports full keypad support including multi key compatible with standard arduino Keypad library https://github.com/Chris--A/Keypad
+
 
 Includes:
 - Support for the TM1638 and TM1640;
