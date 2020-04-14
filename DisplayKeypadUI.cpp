@@ -1,9 +1,9 @@
-#include "input.h"
+#include "DisplayKeypadUI.h"
 
 #define DEBUG
 
 // use this to update
-byte debugInputStatus(byte newStatus)
+byte DisplayKeypadUI::debugInputStatus(byte newStatus)
 {
 #ifdef DEBUG
   Serial.println("Input - Status:" + String(newStatus));
@@ -12,7 +12,7 @@ byte debugInputStatus(byte newStatus)
   return newStatus;
 }
 
-String inputKeypad(TM1638GCA displayKeyModule, Keypad keyPad, const String label, uint8_t minLength, uint8_t maxLength, bool allowAlphaNumeric, String edit)
+String DisplayKeypadUI::enterText( const String label, uint8_t minLength, uint8_t maxLength, bool allowAlphaNumeric, String edit)
 {
 #define INPUT_STATUS_LABEL 1      // display label
 #define INPUT_STATUS_INPROGRESS 2 // awaiting further input
@@ -40,7 +40,7 @@ String inputKeypad(TM1638GCA displayKeyModule, Keypad keyPad, const String label
   char key = NO_KEY;
   char lastKey;
 
-  displayKeyModule.clearDisplay();
+  _dispKpd.clearDisplay();
 
   String input = edit;
   bool editMode = (input != "");
@@ -49,8 +49,8 @@ String inputKeypad(TM1638GCA displayKeyModule, Keypad keyPad, const String label
   {
     currentMillis = millis();
 
-    char newKey = keyPad.getKey();
-    switch (keyPad.getState())
+    char newKey = _kpd.getKey();
+    switch (_kpd.getState())
     {
     case RELEASED:
 
@@ -70,7 +70,7 @@ String inputKeypad(TM1638GCA displayKeyModule, Keypad keyPad, const String label
       switch (newKey)
       {
       case NO_KEY:
-        displayKeyModule.scrollDisplayToString(label, &scrollPos, &scrollMillis);
+        _dispKpd.scrollDisplayToString(label, &scrollPos, &scrollMillis);
         break;
       case INPUT_ABBORT_CHAR:
         status = INPUT_STATUS_ABORT;
@@ -81,7 +81,7 @@ String inputKeypad(TM1638GCA displayKeyModule, Keypad keyPad, const String label
           status = debugInputStatus(INPUT_STATUS_SUCCESS);
         break;
       default:
-        displayKeyModule.clearDisplay();
+        _dispKpd.clearDisplay();
         status = debugInputStatus(INPUT_STATUS_INPROGRESS);
       }
     }
@@ -137,11 +137,11 @@ String inputKeypad(TM1638GCA displayKeyModule, Keypad keyPad, const String label
       // update display if there was a key event
       if (newKey != NO_KEY)
       {
-        // show last displayKeyModule.getDisplayDigits() of entered intput (scroll to right)
-        unsigned int start = max(0, int(input.length() - displayKeyModule.getDisplayDigits()));
-        unsigned int end = start + min(int(input.length()), displayKeyModule.getDisplayDigits());
+        // show last _dispKpd.getDisplayDigits() of entered intput (scroll to right)
+        unsigned int start = max(0, int(input.length() - _dispKpd.getDisplayDigits()));
+        unsigned int end = start + min(int(input.length()), _dispKpd.getDisplayDigits());
         String txt = input.substring(start, end);
-        displayKeyModule.setDisplayToString(txt);
+        _dispKpd.setDisplayToString(txt);
       }
     }
 
@@ -150,12 +150,12 @@ String inputKeypad(TM1638GCA displayKeyModule, Keypad keyPad, const String label
     delay(10); // or yield() could be called as well but not generally supported for all arduino platforms
   } while ((status != INPUT_STATUS_SUCCESS) && (status != INPUT_STATUS_ABORT));
 
-  displayKeyModule.clearDisplay();
+  _dispKpd.clearDisplay();
   return input;
 }
 
 // selections[0] is label; returns selection 1-numSelections; return 0 is abort/not selected
-uint8_t selectKeypad(TM1638GCA displayKeyModule, Keypad keyPad, String selections[], uint8_t numSelections, uint8_t selected)
+uint8_t DisplayKeypadUI::selectOptions( String selections[], uint8_t numSelections, uint8_t selected)
 {
 
 #define INPUT_LABEL_MAX_LENGTH 32
@@ -170,7 +170,7 @@ uint8_t selectKeypad(TM1638GCA displayKeyModule, Keypad keyPad, String selection
   unsigned long previousMillis = 0;
   uint8_t scrollPos = 0;
 
-  displayKeyModule.clearDisplay();
+  _dispKpd.clearDisplay();
 
   bool showSelectedFirst = (selected != 0);
 
@@ -178,12 +178,12 @@ uint8_t selectKeypad(TM1638GCA displayKeyModule, Keypad keyPad, String selection
 
   do
   {
-    displayKeyModule.scrollDisplayToString(selections[curSel], &scrollPos, &previousMillis);
+    _dispKpd.scrollDisplayToString(selections[curSel], &scrollPos, &previousMillis);
 
-    char key = keyPad.getKey();
+    char key = _kpd.getKey();
     if (key)
     {
-      KeyState state = keyPad.getState();
+      KeyState state = _kpd.getState();
       if (state) // Only find keys that have changed state.
       {
         switch (state)
@@ -228,7 +228,7 @@ uint8_t selectKeypad(TM1638GCA displayKeyModule, Keypad keyPad, String selection
             }
 
             // start scrolling next entry
-            displayKeyModule.clearDisplay();
+            _dispKpd.clearDisplay();
             scrollPos = 0;
             previousMillis = 0;
           }
@@ -244,7 +244,7 @@ uint8_t selectKeypad(TM1638GCA displayKeyModule, Keypad keyPad, String selection
     yield();
 
   } while ((status != INPUT_STATUS_SUCCESS) && (status != INPUT_STATUS_ABORT));
-  displayKeyModule.clearDisplay();
+  _dispKpd.clearDisplay();
 
   return curSel;
 }
