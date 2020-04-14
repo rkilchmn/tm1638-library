@@ -32,6 +32,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define TM1638_COLOR_RED    1
 #define TM1638_COLOR_GREEN  2
 
+struct keyPressed_s {
+  byte Kn;  // K1-3
+  byte KSn; // KS1-8
+};
+
+
 class TM1638 : public TM16XX
 {
   public:
