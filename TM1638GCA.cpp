@@ -68,7 +68,7 @@ void TM1638GCA::setDisplayToString(const char *string, const word dots, const by
 	{
 		if (!done && string[i] != '\0')
 		{
-			values[i] = font[string[i] - 32] | (((dots >> (displays - i - 1)) & 1) << 7);
+			values[i] = font[string[i] - 32] | (((dots >> (CA_LOGIC - _displayMap[i])) & 1) << 7);
 		}
 		else
 		{
@@ -82,24 +82,7 @@ void TM1638GCA::setDisplayToString(const char *string, const word dots, const by
 
 void TM1638GCA::setDisplayToString(String string, const word dots, const byte ignored, const byte font[])
 {
-	byte values[displays];
-	int stringLength = string.length();
-
-	memset(values, 0, displays * sizeof(byte));
-
-	for (int i = 0; i < displays; i++)
-	{
-		if (i < stringLength)
-		{
-			values[i] = font[string.charAt(i) - 32] | (((dots >> (displays - i - 1)) & 1) << 7);
-		}
-		else
-		{
-			values[i] = (((dots >> (displays - i - 1)) & 1) << 7);
-		}
-	}
-
-	setDisplay(values, displays);
+	setDisplayToString( string.c_str(), dots, ignored, font);
 }
 
 void TM1638GCA::setDisplayToBinNumber(byte number, byte dots, const byte numberFont[])
